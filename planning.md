@@ -137,7 +137,7 @@ App
   - `movie` — single movie object with: `id`, `title`, `poster_path`, `vote_average`
   - `onClick(movieId)` — callback when card is clicked
 - **State:** None
-- **Image handling:** If `poster_path` is null, render a generic placeholder image with the movie title overlaid.
+- **Image handling:** If `poster_path` is null, render a styled placeholder div with the movie title displayed as text.
 
 ---
 
