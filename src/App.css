@@ -3,3 +3,27 @@
   background-color: #0d0d0d;
   padding-top: 60px;
 }
+
+.modal-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  color: #fff;
+  font-size: 16px;
+}
+
+.modal-error-message {
+  text-align: center;
+}
+
+.modal-error-message p {
+  color: #e50914;
+  margin-bottom: 16px;
+}

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Header from './components/Header/Header'
 import Hero from './components/Hero/Hero'
 import MovieList from './components/MovieList/MovieList'
+import MovieModal from './components/MovieModal/MovieModal'
 import './App.css'
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -16,6 +17,10 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [sortBy, setSortBy] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [modalError, setModalError] = useState(null);
+  const triggerRef = useRef(null);
 
   const fetchMovies = async (query, pageNum) => {
     setIsLoading(true);
@@ -51,9 +56,51 @@ const App = () => {
     }
   };
 
+  const fetchMovieDetails = async (movieId) => {
+    setIsModalLoading(true);
+    setModalError(null);
+
+    try {
+      const response = await fetch(
+        `${TMDB_BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 404
+            ? "Movie not found."
+            : response.status === 401
+            ? "Invalid API key."
+            : `Failed to fetch movie details (${response.status})`
+        );
+      }
+
+      const data = await response.json();
+      setSelectedMovie(data);
+    } catch (err) {
+      setModalError(err.message);
+    } finally {
+      setIsModalLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchMovies("", 1);
   }, []);
+
+  const handleMovieClick = (movieId) => {
+    triggerRef.current = document.activeElement;
+    fetchMovieDetails(movieId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
+    setModalError(null);
+    if (triggerRef.current) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  };
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -110,7 +157,7 @@ const App = () => {
       {!isSearchMode && <Hero movies={movies} />}
       <MovieList
         movies={getSortedMovies()}
-        onMovieClick={(id) => console.log("Movie clicked:", id)}
+        onMovieClick={handleMovieClick}
         onLoadMore={handleLoadMore}
         hasMore={page < totalPages}
         isLoading={isLoading}
@@ -123,6 +170,22 @@ const App = () => {
         page={page}
         totalPages={totalPages}
       />
+      {isModalLoading && (
+        <div className="modal-loading-overlay">
+          <p>Loading movie details...</p>
+        </div>
+      )}
+      {modalError && !selectedMovie && (
+        <div className="modal-loading-overlay" onClick={handleCloseModal}>
+          <div className="modal-error-message">
+            <p>{modalError}</p>
+            <button onClick={handleCloseModal}>Close</button>
+          </div>
+        </div>
+      )}
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
+      )}
     </div>
   );
 };
