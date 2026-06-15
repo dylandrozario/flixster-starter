@@ -1,5 +1,5 @@
 .movie-card {
-  background-color: #1e1e1e;
+  background-color: #181818;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
@@ -8,8 +8,8 @@
 
 .movie-card:hover,
 .movie-card:focus {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
   outline: none;
 }
 
@@ -28,7 +28,7 @@
 .movie-card-placeholder {
   width: 100%;
   aspect-ratio: 2 / 3;
-  background-color: #2a2a2a;
+  background-color: #222;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +36,7 @@
 }
 
 .movie-card-placeholder-text {
-  color: #888;
+  color: #555;
   font-size: 14px;
   text-align: center;
   word-break: break-word;
@@ -47,16 +47,16 @@
 }
 
 .movie-card-title {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .movie-card-rating {
-  font-size: 13px;
-  color: #ccc;
+  font-size: 12px;
+  color: #999;
 }

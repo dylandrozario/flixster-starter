@@ -1,0 +1,145 @@
+.hero {
+  width: 100%;
+  min-height: 480px;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-color: #0d0d0d;
+  position: relative;
+}
+
+.hero-overlay {
+  width: 100%;
+  min-height: 480px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  display: flex;
+  align-items: center;
+  padding: 60px 0;
+  position: relative;
+}
+
+.hero-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.hero-arrow:hover {
+  border-color: #e50914;
+  color: #e50914;
+  background: transparent;
+}
+
+.hero-arrow-left {
+  margin-left: 32px;
+}
+
+.hero-arrow-right {
+  margin-right: 32px;
+  margin-left: auto;
+}
+
+.hero-content {
+  max-width: 550px;
+  padding: 0 40px;
+}
+
+.hero-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #e50914;
+  letter-spacing: 1.5px;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: #fff;
+  margin: 12px 0 16px;
+  line-height: 1.1;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-rating {
+  color: #ffd700;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hero-date {
+  color: #999;
+  font-size: 14px;
+}
+
+.hero-overview {
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-indicator {
+  color: #888;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 360px;
+  }
+
+  .hero-overlay {
+    min-height: 360px;
+  }
+
+  .hero-arrow {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .hero-arrow-left {
+    margin-left: 12px;
+  }
+
+  .hero-arrow-right {
+    margin-right: 12px;
+  }
+
+  .hero-content {
+    padding: 0 20px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-overview {
+    -webkit-line-clamp: 3;
+  }
+}

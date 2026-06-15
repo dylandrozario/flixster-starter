@@ -88,15 +88,15 @@ App
 
 ### SearchBar
 
-- **Responsibility:** Accepts user input to search movies with live debounced search.
-- **Renders:** A text input field with a "Now Playing" button to clear search
+- **Responsibility:** Accepts user input to search movies by title and submits the query on form submission.
+- **Renders:** A form with a text input, a submit button, and a "Now Playing" button (visible when in search mode) to return to the default view
 - **Props:**
-  - `onSearch(query)` — callback invoked with the debounced search string
+  - `onSearch(query)` — callback invoked with the trimmed search string on submit
   - `onClear()` — callback to return to Now Playing view
   - `isSearchMode` — boolean to conditionally show the "Now Playing" button
 - **State:**
   - `input` — controlled input value for the text field
-- **Behavior:** Debounces input by ~500ms before calling `onSearch`. Calls `onClear` when input is cleared or "Now Playing" is clicked.
+- **Behavior:** On form submit (Enter key or button click), calls `onSearch` with the trimmed input. Empty submissions are ignored. Calls `onClear` when "Now Playing" is clicked (also clears input).
 
 ---
 
@@ -246,7 +246,7 @@ const BACKDROP_SIZE = "w1280";
 | Variable | Type | Initial Value | Owner | Update Trigger |
 |----------|------|---------------|-------|----------------|
 | `movies` | `Array<Object>` | `[]` | App | API response (now playing or search); Load More appends new results |
-| `searchQuery` | `String` | `""` | App | Debounced input from SearchBar (after ~500ms) |
+| `searchQuery` | `String` | `""` | App | Set on SearchBar form submit; cleared on "Now Playing" click |
 | `page` | `Number` | `1` | App | "Load More" increments; new search or clear resets to 1 |
 | `totalPages` | `Number` | `1` | App | Set from API response `total_pages` |
 | `sortBy` | `String` | `""` | App | SortControl dropdown change |
@@ -255,7 +255,7 @@ const BACKDROP_SIZE = "w1280";
 | `isModalLoading` | `Boolean` | `false` | App | True when detail fetch starts (on card click), false on success/error |
 | `error` | `String \| null` | `null` | App | Set on fetch failure, cleared on next successful fetch |
 | `isSearchMode` | `Boolean` | `false` | App | True when searchQuery is non-empty, false when cleared |
-| `input` | `String` | `""` | SearchBar | User typing in search field |
+| `input` | `String` | `""` | Header | User typing in search field |
 | `aiRecommendation` | `String` | `""` | MovieModal | OpenRouter API response when modal opens |
 | `aiLoading` | `Boolean` | `false` | MovieModal | True when AI fetch starts, false on completion |
 | `aiError` | `String \| null` | `null` | MovieModal | Set on AI fetch failure |
@@ -272,11 +272,11 @@ Before passing movies to `MovieList`, App applies client-side sorting based on `
 
 When a user clicks a `MovieCard`, the card calls `onClick(movie.id)` which propagates up through `MovieList` to `App`. App sets `isModalLoading` to true and shows a loading indicator. App fetches the Movie Details endpoint using that ID to get runtime, genres, and backdrop (not available in the list response). On success, App sets `selectedMovie` and `isModalLoading` to false, which renders `MovieModal`. On failure, App shows an error toast and does not open the modal.
 
-For search: as the user types, `SearchBar` debounces input by 500ms, then calls `onSearch(query)`. App resets `page` to 1, sets `isSearchMode` to true, and fetches the Search endpoint. "Load More" in search mode passes the same `searchQuery` with an incremented page.
+For search: when the user submits the form (Enter or button click), `SearchBar` calls `onSearch(query)`. App resets `page` to 1, sets `isSearchMode` to true, and fetches the Search endpoint. "Load More" in search mode passes the same `searchQuery` with an incremented page.
 
 ```
-User types in SearchBar
-    │ (debounce 500ms)
+User submits search (Enter / click)
+    │
     ▼
 App.onSearch(query) → fetch search endpoint
     │
@@ -406,7 +406,7 @@ From the `selectedMovie` object:
 
 | Decision | Rationale |
 |----------|-----------|
-| Live search with debounce (500ms) | More responsive UX; avoids excessive API calls with debounce |
+| Submit-based search (Enter/button click) | Simpler implementation, fewer API calls, user has explicit control over when search fires |
 | Client-side sort on loaded data | TMDb Now Playing doesn't support sort params; keeps UX fast |
 | Don't open modal until detail fetch succeeds | Prevents showing an empty/broken modal state |
 | Full accessibility on modal | Focus trap + Escape + aria is the correct accessible pattern for dialogs |
