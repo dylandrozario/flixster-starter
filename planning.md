@@ -338,6 +338,22 @@ App.onMovieClick(id) → set isModalLoading, fetch /movie/{id}
 
 ---
 
+## Responsive Breakpoints
+
+| Viewport | Width | Cards per row | Notes |
+|----------|-------|---------------|-------|
+| Desktop large | > 1200px | 5–6 | Full grid, comfortable spacing |
+| Desktop | 1024px–1200px | 4–5 | Slightly tighter |
+| Tablet | 600px–1024px | 3 | Reduced padding, smaller cards |
+| Mobile | < 600px | 2 | Minimal padding, stacked header |
+
+- Grid uses `auto-fill` with `minmax()` so cards reflow naturally between breakpoints
+- Header stacks vertically on mobile
+- Hero section reduces height and font size on tablet/mobile
+- Movie cards maintain 2:3 aspect ratio at all sizes
+
+---
+
 ## Sort Behavior
 
 - **Client-side only** — TMDb Now Playing doesn't support server-side sort

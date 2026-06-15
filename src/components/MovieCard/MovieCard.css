@@ -60,3 +60,17 @@
   font-size: 12px;
   color: #999;
 }
+
+@media (max-width: 600px) {
+  .movie-card-info {
+    padding: 8px;
+  }
+
+  .movie-card-title {
+    font-size: 12px;
+  }
+
+  .movie-card-rating {
+    font-size: 11px;
+  }
+}

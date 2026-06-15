@@ -108,13 +108,23 @@
   font-size: 13px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .hero {
-    min-height: 360px;
+    min-height: auto;
   }
 
   .hero-overlay {
-    min-height: 360px;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+  }
+
+  .hero-overlay {
+    min-height: auto;
   }
 
   .hero-arrow {

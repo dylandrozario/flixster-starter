@@ -1,15 +1,5 @@
 .App {
   min-height: 100vh;
   background-color: #0d0d0d;
-}
-
-@media (max-width: 600px) {
-  .search-bar {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .search-bar form {
-    flex-direction: column;
-  }
+  padding-top: 60px;
 }
