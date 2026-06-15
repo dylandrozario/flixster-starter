@@ -386,35 +386,90 @@ From the `selectedMovie` object:
 
 ### Prompt Spec
 
-- **Role:** You are a concise movie critic and recommendation assistant.
-- **Task:** Given a movie's title, genres, and plot summary, provide a 2–3 sentence "Watch Recommendation" that helps a viewer decide if this movie is for them.
-- **Inputs:** Title, genres, overview (passed as user message context)
-- **Output format:** 2–3 sentences, no markdown, no spoilers.
-- **Constraints:** Keep it under 100 words. Do not reveal plot twists. Be honest about tone (e.g., "dark", "lighthearted").
-- **Failure behavior:** Display "Recommendation unavailable at this time." as fallback text.
+- **Role:** You are an enthusiastic but honest film critic who helps viewers decide what to watch tonight. You speak directly to the viewer in second person ("you'll enjoy this if...") but never use first person ("I think...").
+- **Task:** Given a movie's title, genres, and plot summary, write a 2–3 sentence "Watch Recommendation" that helps a viewer decide if this movie is for them. Be specific about what type of viewer would enjoy it and what mood it fits.
+- **Inputs:** Passed as the user message in this format:
+  - Title: `{movie.title}`
+  - Genres: `{genres joined with ", "}`
+  - Overview: `{movie.overview}`
+- **Output format:** Plain text, 2–3 sentences. No markdown formatting, no bullet points, no headers. No "I" statements — address the viewer directly in second person.
+- **Constraints:**
+  - Keep it under 80 words
+  - Do not reveal any plot twists or spoilers beyond what the overview already says
+  - Do not use generic praise like "must-see" or "masterpiece" — be specific about the tone and appeal
+  - Be honest about the tone (e.g., "slow burn", "popcorn fun", "emotionally heavy")
+  - Comparisons to other films are okay only if they genuinely help set expectations
+  - Do not start with the movie title — the viewer already sees it
+- **Failure behavior:** Display "We couldn't generate a recommendation for this one — check out the overview above!" as fallback text. No error codes or technical messages shown to the user.
+
+### System Prompt (sent as system message)
+
+```
+You are an enthusiastic but honest film critic. Write a 2–3 sentence watch recommendation for the movie described below. Speak directly to the viewer in second person. Be specific about what type of viewer would enjoy it and what mood it suits. Do not reveal plot twists. Do not use generic phrases like "must-see" or "masterpiece." Keep it under 80 words. No markdown. No "I" statements.
+```
+
+### User Message Template (sent as user message)
+
+```
+Title: {title}
+Genres: {genres}
+Overview: {overview}
+```
 
 ### API Endpoint
 
 - **URL:** `https://openrouter.ai/api/v1/chat/completions`
-- **Model:** TBD (e.g., `meta-llama/llama-3-8b-instruct` or similar free-tier model)
+- **Model:** `meta-llama/llama-3.3-70b-instruct:free` (free-tier, no billing required)
 - **Headers:**
   - `Authorization: Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`
   - `Content-Type: application/json`
+- **API Key:** Stored in `.env` as `VITE_OPENROUTER_API_KEY` (sign up at openrouter.ai for free)
+
+### Request Body Shape
+
+```json
+{
+  "model": "meta-llama/llama-3.3-70b-instruct:free",
+  "messages": [
+    { "role": "system", "content": "<system prompt above>" },
+    { "role": "user", "content": "Title: ...\nGenres: ...\nOverview: ..." }
+  ]
+}
+```
 
 ### State Management
 
-- `aiRecommendation` (String, initial `""`) — stored in MovieModal, updated when AI response arrives
-- `aiLoading` (Boolean, initial `false`) — set true when fetch begins, false on completion
-- `aiError` (String | null, initial `null`) — set if fetch fails
+| Variable | Type | Initial Value | Owner | Description |
+|----------|------|---------------|-------|-------------|
+| `aiRecommendation` | `String \| null` | `null` | MovieModal | The AI-generated recommendation text; null before fetch completes |
+| `aiLoading` | `Boolean` | `false` | MovieModal | True while the OpenRouter fetch is in progress |
+| `aiError` | `String \| null` | `null` | MovieModal | Set to fallback message if fetch fails |
+
+### Trigger
+
+The AI call fires **when the user clicks the "Get Watch Recommendation" button** inside the modal. This ensures:
+- No unnecessary API calls if the user just wants to see movie details
+- We have the full movie data (title, genres, overview) available to send
+- The user has explicit control over when the AI call fires (avoids rate-limiting from rapid modal open/close)
+- State resets when the modal closes so the next movie starts fresh
 
 ### UX Flow
 
-1. User clicks a MovieCard → loading indicator shown → detail fetch fires
-2. On detail fetch success → modal opens with full movie info
-3. Simultaneously, MovieModal fires AI fetch using movie's title/genres/overview
-4. While AI loading: show "Generating recommendation..." with subtle spinner
-5. On AI success: display the 2–3 sentence recommendation
-6. On AI failure: display "Recommendation unavailable at this time." (no broken UI)
+1. User clicks a MovieCard → detail fetch fires
+2. On detail fetch success → modal opens with full movie info displayed immediately
+3. User sees a "✨ Get Watch Recommendation" button at the bottom of the modal
+4. User clicks the button → sets `aiLoading = true` → calls OpenRouter API
+5. While AI loading: "✨ Generating recommendation..." text with a subtle pulse animation (button disappears)
+6. On AI success: sets `aiRecommendation` → displays the 2–3 sentence recommendation with "Watch Recommendation" heading
+7. On AI failure: sets `aiError` → displays "We couldn't generate a recommendation for this one — check out the overview above!"
+8. When modal closes: all AI state resets (`aiRecommendation`, `aiLoading`, `aiError` back to initial values)
+
+### AI Feature — Decisions Log
+
+- **What the API returned initially:** Responses matched the spec well — 2–3 sentences, second person, specific about tone and viewer type, no spoilers. The system prompt constraints were effective at keeping output focused.
+- **What I changed in my prompt:** No major prompt changes needed. Switched the model from `meta-llama/llama-3.3-70b-instruct:free` to `openai/gpt-oss-120b:free` for better availability. Changed the trigger from auto-firing on modal open to a manual button click to avoid rate-limiting (429 errors) from rapid open/close cycles.
+- **What fallback behavior I implemented:** If the API call fails (network error, rate limit, or bad response), the user sees "We couldn't generate a recommendation for this one — check out the overview above!" — no error codes, no broken UI. The function returns `null` on any failure, and the component checks for `null` to show the fallback.
+- **What I learned:** Free-tier AI models have strict rate limits (~5-10 requests/minute) — auto-firing on modal open caused 429 errors during development. Making it user-triggered (button click) is both better UX (user controls when it fires) and avoids burning through rate limits. Also learned that React StrictMode double-fires useEffect in dev, which doubles API calls — a cleanup function with a `cancelled` flag prevents stale responses from setting state.
 
 ---
 

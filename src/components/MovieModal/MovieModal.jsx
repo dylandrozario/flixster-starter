@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import { getMovieInsight, fetchMovieTrailer, formatDate, formatRuntime, IMG_BASE_URL, POSTER_SIZE, BACKDROP_SIZE } from "../../utils/api";
 import "./MovieModal.css";
-
-const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
-const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 const MovieModal = ({ movie, onClose }) => {
   const modalRef = useRef(null);
   const [closing, setClosing] = useState(false);
+  const [aiRecommendation, setAiRecommendation] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const [trailerKey, setTrailerKey] = useState(null);
+  const [showTrailer, setShowTrailer] = useState(false);
 
   const handleClose = () => {
     setClosing(true);
@@ -30,6 +33,32 @@ const MovieModal = ({ movie, onClose }) => {
       document.body.style.overflow = "";
     };
   }, []);
+
+  useEffect(() => {
+    if (!movie) return;
+    fetchMovieTrailer(movie.id).then((key) => setTrailerKey(key));
+  }, [movie?.id]);
+
+  const handlePlayTrailer = () => {
+    if (trailerKey) setShowTrailer(true);
+  };
+
+  const handleGetRecommendation = () => {
+    const genres = movie.genres ? movie.genres.map((g) => g.name).join(", ") : "";
+
+    setAiLoading(true);
+    setAiRecommendation(null);
+    setAiError(null);
+
+    getMovieInsight(movie.title, genres, movie.overview || "").then((result) => {
+      if (result) {
+        setAiRecommendation(result);
+      } else {
+        setAiError("We couldn't generate a recommendation for this one — check out the overview above!");
+      }
+      setAiLoading(false);
+    });
+  };
 
   const trapFocus = (e) => {
     const modal = modalRef.current;
@@ -59,27 +88,14 @@ const MovieModal = ({ movie, onClose }) => {
   };
 
   const backdrop = movie.backdrop_path
-    ? `${BACKDROP_BASE_URL}${movie.backdrop_path}`
+    ? `${IMG_BASE_URL}/${BACKDROP_SIZE}${movie.backdrop_path}`
     : null;
 
   const poster = movie.poster_path
-    ? `${POSTER_BASE_URL}${movie.poster_path}`
+    ? `${IMG_BASE_URL}/${POSTER_SIZE}${movie.poster_path}`
     : null;
 
   const genreList = movie.genres || [];
-
-  const formatRuntime = (minutes) => {
-    if (!minutes) return "N/A";
-    const hrs = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hrs}h ${mins}m`;
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  };
 
   return (
     <div
@@ -94,11 +110,28 @@ const MovieModal = ({ movie, onClose }) => {
       <div className={`modal-content ${closing ? "modal-content-closing" : ""}`}>
         <button className="modal-close" onClick={handleClose} aria-label="Close modal">✕</button>
 
-        {backdrop && (
-          <div className="modal-backdrop">
-            <img src={backdrop} alt={`${movie.title} backdrop`} />
-          </div>
-        )}
+        <div className="modal-backdrop">
+          {showTrailer && trailerKey ? (
+            <iframe
+              className="modal-trailer"
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+              title={`${movie.title} trailer`}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          ) : (
+            <>
+              {backdrop && <img src={backdrop} alt={`${movie.title} backdrop`} />}
+              {trailerKey && (
+                <button className="modal-play-btn" onClick={handlePlayTrailer} aria-label="Play trailer">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </button>
+              )}
+            </>
+          )}
+        </div>
 
         <div className="modal-body">
           <div className="modal-poster-section">
@@ -125,6 +158,26 @@ const MovieModal = ({ movie, onClose }) => {
               </div>
             )}
             <p className="modal-overview">{movie.overview}</p>
+
+            <div className="modal-ai-section">
+              {!aiRecommendation && !aiLoading && !aiError && (
+                <button className="modal-ai-btn" onClick={handleGetRecommendation}>
+                  ✨ Get Watch Recommendation
+                </button>
+              )}
+              {aiLoading && (
+                <p className="modal-ai-loading">✨ Generating recommendation...</p>
+              )}
+              {aiRecommendation && (
+                <>
+                  <h3 className="modal-ai-title">Watch Recommendation</h3>
+                  <p className="modal-ai-text">{aiRecommendation}</p>
+                </>
+              )}
+              {aiError && (
+                <p className="modal-ai-error">{aiError}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

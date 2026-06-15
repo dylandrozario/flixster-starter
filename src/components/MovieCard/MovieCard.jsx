@@ -1,14 +1,7 @@
+import { formatDate, IMG_BASE_URL, POSTER_SIZE } from "../../utils/api";
 import "./MovieCard.css";
 
-const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-};
-
-const MovieCard = ({ movie, onClick }) => {
+const MovieCard = ({ movie, onClick, isHearted, isStarred, isWatched, onToggleHeart, onToggleStar, onToggleWatched }) => {
   const hasPoster = movie.poster_path !== null;
 
   const handleClick = (e) => {
@@ -21,6 +14,21 @@ const MovieCard = ({ movie, onClick }) => {
       e.preventDefault();
       onClick(movie.id);
     }
+  };
+
+  const handleHeart = (e) => {
+    e.stopPropagation();
+    onToggleHeart(movie.id);
+  };
+
+  const handleStar = (e) => {
+    e.stopPropagation();
+    onToggleStar(movie.id);
+  };
+
+  const handleWatched = (e) => {
+    e.stopPropagation();
+    onToggleWatched(movie.id);
   };
 
   return (
@@ -37,7 +45,7 @@ const MovieCard = ({ movie, onClick }) => {
           {hasPoster ? (
             <img
               className="movie-card-poster"
-              src={`${POSTER_BASE_URL}${movie.poster_path}`}
+              src={`${IMG_BASE_URL}/${POSTER_SIZE}${movie.poster_path}`}
               alt={`${movie.title} poster`}
             />
           ) : (
@@ -63,6 +71,38 @@ const MovieCard = ({ movie, onClick }) => {
                 : movie.overview
               : "No description available."}
           </p>
+          <div className="movie-card-back-actions">
+            <button
+              className={`card-action-btn ${isHearted ? "card-action-btn-active" : ""}`}
+              onClick={handleHeart}
+              aria-label={isHearted ? "Remove heart" : "Heart this movie"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={isHearted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+            <button
+              className={`card-action-btn ${isStarred ? "card-action-btn-star" : ""}`}
+              onClick={handleStar}
+              aria-label={isStarred ? "Remove star" : "Star this movie"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={isStarred ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+            <button
+              className={`card-action-btn ${isWatched ? "card-action-btn-watched" : ""}`}
+              onClick={handleWatched}
+              aria-label={isWatched ? "Mark as unwatched" : "Mark as watched"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+                {isWatched && <polyline points="9 17 11 19 15 15" stroke="currentColor" strokeWidth="2" />}
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

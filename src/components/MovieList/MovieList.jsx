@@ -1,7 +1,7 @@
 import MovieCard from "../MovieCard/MovieCard";
 import "./MovieList.css";
 
-const MovieList = ({ movies, onMovieClick, onLoadMore, hasMore, isLoading, error, onRetry, isSearchMode, searchQuery, sortBy, onSortChange, page, totalPages }) => {
+const MovieList = ({ movies, onMovieClick, onLoadMore, hasMore, isLoading, error, onRetry, isSearchMode, searchQuery, sortBy, onSortChange, page, totalPages, hearted, starred, watched, onToggleHeart, onToggleStar, onToggleWatched }) => {
   if (error && movies.length === 0) {
     return (
       <div className="movie-list-error">
@@ -48,7 +48,17 @@ const MovieList = ({ movies, onMovieClick, onLoadMore, hasMore, isLoading, error
       </div>
       <div className="movie-list-grid">
         {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} />
+          <MovieCard
+            key={movie.id}
+            movie={movie}
+            onClick={onMovieClick}
+            isHearted={hearted.has(movie.id)}
+            isStarred={starred.has(movie.id)}
+            isWatched={watched.has(movie.id)}
+            onToggleHeart={onToggleHeart}
+            onToggleStar={onToggleStar}
+            onToggleWatched={onToggleWatched}
+          />
         ))}
       </div>
       <div className="movie-list-footer">

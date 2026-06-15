@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./Header.css";
 
-const Header = ({ onSearch, onClear, isSearchMode }) => {
+const Header = ({ onSearch, onClear, isSearchMode, onOpenSidebar }) => {
   const [input, setInput] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -37,23 +37,22 @@ const Header = ({ onSearch, onClear, isSearchMode }) => {
   return (
     <>
       <header className={`header ${scrolled ? "header-scrolled" : ""}`}>
-        <div className="header-left">
-          <span className="header-logo">FLIXSTER</span>
-          <nav className="header-nav">
-            <button className="nav-link" onClick={handleHome}>Home</button>
-            <span className="nav-link">Movies</span>
-          </nav>
-        </div>
+        <span className="header-logo" onClick={handleHome}>FLIXSTER</span>
+        <form className="header-search header-search-desktop" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Search movies..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button type="submit">Search</button>
+          {isSearchMode && (
+            <button type="button" className="header-clear-btn" onClick={handleHome}>
+              Now Playing
+            </button>
+          )}
+        </form>
         <div className="header-right">
-          <form className="header-search header-search-desktop" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Search movies..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-            <button type="submit">Search</button>
-          </form>
           <button
             className="mobile-search-toggle"
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -64,11 +63,14 @@ const Header = ({ onSearch, onClear, isSearchMode }) => {
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </button>
-          {isSearchMode && (
-            <button className="header-clear-btn" onClick={handleHome}>
-              Now Playing
-            </button>
-          )}
+          <button className="header-sidebar-btn" onClick={onOpenSidebar} aria-label="Open my lists">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg>
+          </button>
         </div>
       </header>
       {mobileSearchOpen && (

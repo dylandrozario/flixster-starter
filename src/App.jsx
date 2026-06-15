@@ -4,10 +4,9 @@ import Hero from './components/Hero/Hero'
 import MovieList from './components/MovieList/MovieList'
 import MovieModal from './components/MovieModal/MovieModal'
 import Footer from './components/Footer/Footer'
+import Sidebar from './components/Sidebar/Sidebar'
+import { fetchNowPlaying, searchMovies, fetchMovieDetails, sortMovies } from './utils/api'
 import './App.css'
-
-const TMDB_BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const App = () => {
   const [movies, setMovies] = useState([]);
@@ -19,30 +18,22 @@ const App = () => {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null);
-  const [isModalLoading, setIsModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
+  const [hearted, setHearted] = useState(new Set());
+  const [starred, setStarred] = useState(new Set());
+  const [watched, setWatched] = useState(new Set());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const triggerRef = useRef(null);
 
-  const fetchMovies = async (query, pageNum) => {
+  const loadMovies = async (query, pageNum) => {
     setIsLoading(true);
     setError(null);
 
-    const url = query
-      ? `${TMDB_BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=${pageNum}`
-      : `${TMDB_BASE_URL}/movie/now_playing?api_key=${API_KEY}&language=en-US&page=${pageNum}`;
-
     try {
-      const response = await fetch(url);
+      const data = query
+        ? await searchMovies(query, pageNum)
+        : await fetchNowPlaying(pageNum);
 
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Invalid API key. Check your .env file."
-            : `Failed to fetch movies (${response.status})`
-        );
-      }
-
-      const data = await response.json();
       setTotalPages(data.total_pages);
 
       if (pageNum === 1) {
@@ -57,42 +48,21 @@ const App = () => {
     }
   };
 
-  const fetchMovieDetails = async (movieId) => {
-    setIsModalLoading(true);
+  const handleMovieClick = async (movieId) => {
+    triggerRef.current = document.activeElement;
     setModalError(null);
 
     try {
-      const response = await fetch(
-        `${TMDB_BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 404
-            ? "Movie not found."
-            : response.status === 401
-            ? "Invalid API key."
-            : `Failed to fetch movie details (${response.status})`
-        );
-      }
-
-      const data = await response.json();
+      const data = await fetchMovieDetails(movieId);
       setSelectedMovie(data);
     } catch (err) {
       setModalError(err.message);
-    } finally {
-      setIsModalLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMovies("", 1);
+    loadMovies("", 1);
   }, []);
-
-  const handleMovieClick = (movieId) => {
-    triggerRef.current = document.activeElement;
-    fetchMovieDetails(movieId);
-  };
 
   const handleCloseModal = () => {
     setSelectedMovie(null);
@@ -107,45 +77,60 @@ const App = () => {
     setSearchQuery(query);
     setIsSearchMode(true);
     setPage(1);
-    fetchMovies(query, 1);
+    loadMovies(query, 1);
   };
 
   const handleClear = () => {
     setSearchQuery("");
     setIsSearchMode(false);
     setPage(1);
-    fetchMovies("", 1);
+    loadMovies("", 1);
+  };
+
+  const handleToggleHeart = (movieId) => {
+    setHearted((prev) => {
+      const next = new Set(prev);
+      if (next.has(movieId)) {
+        next.delete(movieId);
+      } else {
+        next.add(movieId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleStar = (movieId) => {
+    setStarred((prev) => {
+      const next = new Set(prev);
+      if (next.has(movieId)) {
+        next.delete(movieId);
+      } else {
+        next.add(movieId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleWatched = (movieId) => {
+    setWatched((prev) => {
+      const next = new Set(prev);
+      if (next.has(movieId)) {
+        next.delete(movieId);
+      } else {
+        next.add(movieId);
+      }
+      return next;
+    });
   };
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchMovies(searchQuery, nextPage);
+    loadMovies(searchQuery, nextPage);
   };
 
   const handleRetry = () => {
-    fetchMovies(searchQuery, page);
-  };
-
-  const handleSortChange = (criteria) => {
-    setSortBy(criteria);
-  };
-
-  const getSortedMovies = () => {
-    if (!sortBy) return movies;
-    const sorted = [...movies];
-    switch (sortBy) {
-      case "title":
-        sorted.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "rating":
-        sorted.sort((a, b) => b.vote_average - a.vote_average);
-        break;
-      case "release_date":
-        sorted.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
-        break;
-    }
-    return sorted;
+    loadMovies(searchQuery, page);
   };
 
   return (
@@ -154,11 +139,12 @@ const App = () => {
         onSearch={handleSearch}
         onClear={handleClear}
         isSearchMode={isSearchMode}
+        onOpenSidebar={() => setSidebarOpen(true)}
       />
       <main>
-        {!isSearchMode && <Hero movies={movies} />}
+        {!isSearchMode && <Hero movies={movies} onMovieClick={handleMovieClick} />}
         <MovieList
-          movies={getSortedMovies()}
+          movies={sortMovies(movies, sortBy)}
           onMovieClick={handleMovieClick}
           onLoadMore={handleLoadMore}
           hasMore={page < totalPages}
@@ -168,9 +154,15 @@ const App = () => {
           isSearchMode={isSearchMode}
           searchQuery={searchQuery}
           sortBy={sortBy}
-          onSortChange={handleSortChange}
+          onSortChange={setSortBy}
           page={page}
           totalPages={totalPages}
+          hearted={hearted}
+          starred={starred}
+          watched={watched}
+          onToggleHeart={handleToggleHeart}
+          onToggleStar={handleToggleStar}
+          onToggleWatched={handleToggleWatched}
         />
       </main>
       {modalError && !selectedMovie && (
@@ -184,6 +176,14 @@ const App = () => {
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
+      <Sidebar
+        movies={movies}
+        hearted={hearted}
+        watched={watched}
+        onMovieClick={handleMovieClick}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       <Footer />
     </div>
   );
