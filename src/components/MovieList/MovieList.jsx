@@ -44,14 +44,6 @@ const MovieList = ({ movies, onMovieClick, onLoadMore, hasMore, isLoading, error
             <option value="rating">Rating</option>
             <option value="release_date">Release Date</option>
           </select>
-          <div className="movie-list-arrows">
-            <button className="arrow-btn" onClick={onLoadMore} disabled={!hasMore || isLoading}>
-              ‹
-            </button>
-            <button className="arrow-btn" onClick={onLoadMore} disabled={!hasMore || isLoading}>
-              ›
-            </button>
-          </div>
         </div>
       </div>
       <div className="movie-list-grid">

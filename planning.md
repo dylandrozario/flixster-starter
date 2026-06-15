@@ -418,6 +418,34 @@ From the `selectedMovie` object:
 
 ---
 
+## Visual Design System
+
+### Color Palette
+- **Background primary:** `#0d0d0d` — deep black, main page background
+- **Background surface:** `#181818` — card/modal surfaces, slightly lifted from base
+- **Accent red:** `#e50914` — Netflix-inspired brand color for CTAs, hover states, active elements
+- **Text primary:** `#ffffff` — headings, titles
+- **Text secondary:** `#b3b3b3` — body text, descriptions
+- **Text muted:** `#666666` — metadata, timestamps
+
+### Typography
+- **Font family:** Inter (Google Fonts) — clean, modern, highly legible at small sizes
+- **Headings:** Inter 700/800, sizes 48px (hero), 24px (modal title), 22px (section titles)
+- **Body:** Inter 400, 14px, line-height 1.6
+- **Small/meta:** Inter 500, 12-13px
+
+### Component Visual Intent
+
+**MovieCard:** Dark surface card with rounded corners. On hover, the card flips with a 3D rotation to reveal a back face showing the movie's rating, release date, and a short overview snippet. The flip animation gives a tactile, interactive feel matching streaming app cards.
+
+**MovieModal:** Centered overlay with a cinematic feel — large backdrop image bleeds to edges at top, content below with generous padding. Clear hierarchy: large bold title, then metadata row in muted tones, genres in accent red, overview in secondary text. The close button floats top-right with a glass-morphism circle.
+
+**Header:** Minimal, transparent over the hero, transitions to a frosted glass dark bar on scroll. Logo in accent red, nav links subtle until hovered.
+
+**Footer:** Understated — thin top border separator, small muted text, TMDb attribution link in accent red.
+
+---
+
 ## Design Decisions Log
 
 | Decision | Rationale |

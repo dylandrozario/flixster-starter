@@ -41,7 +41,7 @@
   background: none;
   border: none;
   color: #aaa;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   padding: 0;
@@ -66,7 +66,8 @@
 
 .header-search input {
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
   border: 1px solid #333;
   border-radius: 4px;
   width: 220px;

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./MovieModal.css";
 
 const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
@@ -6,10 +6,18 @@ const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 const MovieModal = ({ movie, onClose }) => {
   const modalRef = useRef(null);
+  const [closing, setClosing] = useState(false);
+
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 250);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
       if (e.key === "Tab") trapFocus(e);
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -21,7 +29,7 @@ const MovieModal = ({ movie, onClose }) => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, []);
 
   const trapFocus = (e) => {
     const modal = modalRef.current;
@@ -47,7 +55,7 @@ const MovieModal = ({ movie, onClose }) => {
   };
 
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) handleClose();
   };
 
   const backdrop = movie.backdrop_path
@@ -58,9 +66,7 @@ const MovieModal = ({ movie, onClose }) => {
     ? `${POSTER_BASE_URL}${movie.poster_path}`
     : null;
 
-  const genres = movie.genres
-    ? movie.genres.map((g) => g.name).join(", ")
-    : "";
+  const genreList = movie.genres || [];
 
   const formatRuntime = (minutes) => {
     if (!minutes) return "N/A";
@@ -69,9 +75,15 @@ const MovieModal = ({ movie, onClose }) => {
     return `${hrs}h ${mins}m`;
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  };
+
   return (
     <div
-      className="modal-overlay"
+      className={`modal-overlay ${closing ? "modal-closing" : ""}`}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -79,8 +91,8 @@ const MovieModal = ({ movie, onClose }) => {
       ref={modalRef}
       tabIndex={-1}
     >
-      <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>✕</button>
+      <div className={`modal-content ${closing ? "modal-content-closing" : ""}`}>
+        <button className="modal-close" onClick={handleClose} aria-label="Close modal">✕</button>
 
         {backdrop && (
           <div className="modal-backdrop">
@@ -103,9 +115,15 @@ const MovieModal = ({ movie, onClose }) => {
             <div className="modal-meta">
               <span className="modal-rating">⭐ {movie.vote_average?.toFixed(1)}</span>
               <span className="modal-runtime">{formatRuntime(movie.runtime)}</span>
-              <span className="modal-release">{movie.release_date}</span>
+              <span className="modal-release">{formatDate(movie.release_date)}</span>
             </div>
-            {genres && <p className="modal-genres">{genres}</p>}
+            {genreList.length > 0 && (
+              <div className="modal-genres">
+                {genreList.map((g) => (
+                  <span key={g.id} className="modal-genre-tag">{g.name}</span>
+                ))}
+              </div>
+            )}
             <p className="modal-overview">{movie.overview}</p>
           </div>
         </div>

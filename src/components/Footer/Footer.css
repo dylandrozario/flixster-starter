@@ -1,0 +1,27 @@
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid #1f1f1f;
+  margin-top: 48px;
+}
+
+.footer-copyright {
+  color: #888;
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.footer-attribution {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+.footer-attribution a {
+  color: #e50914;
+  text-decoration: none;
+}
+
+.footer-attribution a:hover {
+  text-decoration: underline;
+}

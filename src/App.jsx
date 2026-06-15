@@ -3,6 +3,7 @@ import Header from './components/Header/Header'
 import Hero from './components/Hero/Hero'
 import MovieList from './components/MovieList/MovieList'
 import MovieModal from './components/MovieModal/MovieModal'
+import Footer from './components/Footer/Footer'
 import './App.css'
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -154,27 +155,24 @@ const App = () => {
         onClear={handleClear}
         isSearchMode={isSearchMode}
       />
-      {!isSearchMode && <Hero movies={movies} />}
-      <MovieList
-        movies={getSortedMovies()}
-        onMovieClick={handleMovieClick}
-        onLoadMore={handleLoadMore}
-        hasMore={page < totalPages}
-        isLoading={isLoading}
-        error={error}
-        onRetry={handleRetry}
-        isSearchMode={isSearchMode}
-        searchQuery={searchQuery}
-        sortBy={sortBy}
-        onSortChange={handleSortChange}
-        page={page}
-        totalPages={totalPages}
-      />
-      {isModalLoading && (
-        <div className="modal-loading-overlay">
-          <p>Loading movie details...</p>
-        </div>
-      )}
+      <main>
+        {!isSearchMode && <Hero movies={movies} />}
+        <MovieList
+          movies={getSortedMovies()}
+          onMovieClick={handleMovieClick}
+          onLoadMore={handleLoadMore}
+          hasMore={page < totalPages}
+          isLoading={isLoading}
+          error={error}
+          onRetry={handleRetry}
+          isSearchMode={isSearchMode}
+          searchQuery={searchQuery}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          page={page}
+          totalPages={totalPages}
+        />
+      </main>
       {modalError && !selectedMovie && (
         <div className="modal-loading-overlay" onClick={handleCloseModal}>
           <div className="modal-error-message">
@@ -186,6 +184,7 @@ const App = () => {
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
+      <Footer />
     </div>
   );
 };
