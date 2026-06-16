@@ -2,10 +2,10 @@ import { useState } from "react";
 import { IMG_BASE_URL, POSTER_SIZE } from "../../utils/api";
 import "./Sidebar.css";
 
-const Sidebar = ({ movies, hearted, watched, onMovieClick, isOpen, onClose }) => {
+const Sidebar = ({ movies, starred, watched, onMovieClick, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("favorites");
 
-  const favoriteMovies = movies.filter((m) => hearted.has(m.id));
+  const favoriteMovies = movies.filter((m) => starred.has(m.id));
   const watchedMovies = movies.filter((m) => watched.has(m.id));
 
   const displayList = activeTab === "favorites" ? favoriteMovies : watchedMovies;
@@ -23,7 +23,7 @@ const Sidebar = ({ movies, hearted, watched, onMovieClick, isOpen, onClose }) =>
             className={`sidebar-tab ${activeTab === "favorites" ? "sidebar-tab-active" : ""}`}
             onClick={() => setActiveTab("favorites")}
           >
-            ♥ Favorites ({favoriteMovies.length})
+            ★ Favorites ({favoriteMovies.length})
           </button>
           <button
             className={`sidebar-tab ${activeTab === "watched" ? "sidebar-tab-active" : ""}`}
@@ -36,7 +36,7 @@ const Sidebar = ({ movies, hearted, watched, onMovieClick, isOpen, onClose }) =>
           {displayList.length === 0 ? (
             <p className="sidebar-empty">
               {activeTab === "favorites"
-                ? "No favorites yet — heart a movie to add it here."
+                ? "No favorites yet — star a movie to add it here."
                 : "No watched movies yet — mark a movie as watched to track it here."}
             </p>
           ) : (

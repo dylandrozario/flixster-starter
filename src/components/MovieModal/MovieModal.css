@@ -119,6 +119,26 @@
   display: block;
 }
 
+.modal-trailer-exit {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.modal-trailer-exit:hover {
+  background-color: #e50914;
+}
+
 .modal-play-btn {
   position: absolute;
   top: 50%;

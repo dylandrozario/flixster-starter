@@ -159,7 +159,7 @@ const App = () => {
       )}
       <Sidebar
         movies={movies}
-        hearted={hearted}
+        starred={starred}
         watched={watched}
         onMovieClick={handleMovieClick}
         isOpen={sidebarOpen}

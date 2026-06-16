@@ -39,18 +39,28 @@ const Header = ({ onSearch, onClear, isSearchMode, onOpenSidebar }) => {
       <header className={`header ${scrolled ? "header-scrolled" : ""}`}>
         <span className="header-logo" onClick={handleHome}>FLIXSTER</span>
         <form className="header-search header-search-desktop" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Search movies..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <button type="submit">Search</button>
-          {isSearchMode && (
-            <button type="button" className="header-clear-btn" onClick={handleHome}>
-              Now Playing
+          <div className="search-input-wrapper">
+            <button type="submit" className="search-submit" aria-label="Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
             </button>
-          )}
+            <input
+              type="text"
+              placeholder="Search movies..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            {input && (
+              <button type="button" className="search-clear" onClick={handleHome} aria-label="Clear search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+          </div>
         </form>
         <div className="header-right">
           <button

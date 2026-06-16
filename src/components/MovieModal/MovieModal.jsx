@@ -114,17 +114,24 @@ const MovieModal = ({ movie, onClose }) => {
       tabIndex={-1}
     >
       <div className={`modal-content ${closing ? "modal-content-closing" : ""}`}>
-        <button className="modal-close" onClick={handleClose} aria-label="Close modal">✕</button>
+        {!showTrailer && (
+          <button className="modal-close" onClick={handleClose} aria-label="Close modal">✕</button>
+        )}
 
         <div className="modal-backdrop">
           {showTrailer && trailerKey ? (
-            <iframe
-              className="modal-trailer"
-              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
-              title={`${movie.title} trailer`}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-            />
+            <>
+              <iframe
+                className="modal-trailer"
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                title={`${movie.title} trailer`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+              <button className="modal-trailer-exit" onClick={() => setShowTrailer(false)}>
+                ✕ Back
+              </button>
+            </>
           ) : (
             <>
               {backdrop && <img src={backdrop} alt={`${movie.title} backdrop`} />}
