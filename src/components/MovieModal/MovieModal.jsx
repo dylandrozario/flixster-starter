@@ -39,11 +39,10 @@ const MovieModal = ({ movie, onClose }) => {
     fetchMovieTrailer(movie.id).then((key) => setTrailerKey(key));
   }, [movie?.id]);
 
-  const handlePlayTrailer = () => {
-    if (trailerKey) setShowTrailer(true);
-  };
+  useEffect(() => {
+    if (!movie) return;
+    let cancelled = false;
 
-  const handleGetRecommendation = () => {
     const genres = movie.genres ? movie.genres.map((g) => g.name).join(", ") : "";
 
     setAiLoading(true);
@@ -51,6 +50,7 @@ const MovieModal = ({ movie, onClose }) => {
     setAiError(null);
 
     getMovieInsight(movie.title, genres, movie.overview || "").then((result) => {
+      if (cancelled) return;
       if (result) {
         setAiRecommendation(result);
       } else {
@@ -58,6 +58,12 @@ const MovieModal = ({ movie, onClose }) => {
       }
       setAiLoading(false);
     });
+
+    return () => { cancelled = true; };
+  }, [movie?.id]);
+
+  const handlePlayTrailer = () => {
+    if (trailerKey) setShowTrailer(true);
   };
 
   const trapFocus = (e) => {
@@ -160,19 +166,12 @@ const MovieModal = ({ movie, onClose }) => {
             <p className="modal-overview">{movie.overview}</p>
 
             <div className="modal-ai-section">
-              {!aiRecommendation && !aiLoading && !aiError && (
-                <button className="modal-ai-btn" onClick={handleGetRecommendation}>
-                  ✨ Get Watch Recommendation
-                </button>
-              )}
+              <h3 className="modal-ai-title">Watch Recommendation</h3>
               {aiLoading && (
                 <p className="modal-ai-loading">✨ Generating recommendation...</p>
               )}
               {aiRecommendation && (
-                <>
-                  <h3 className="modal-ai-title">Watch Recommendation</h3>
-                  <p className="modal-ai-text">{aiRecommendation}</p>
-                </>
+                <p className="modal-ai-text">{aiRecommendation}</p>
               )}
               {aiError && (
                 <p className="modal-ai-error">{aiError}</p>

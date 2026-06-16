@@ -78,7 +78,9 @@ export async function getMovieInsight(title, genres, overview) {
     const { data } = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "openai/gpt-oss-120b:free",
+        model: "openrouter/free",
+        max_tokens: 150,
+        temperature: 0.7,
         messages: [
           {
             role: "system",
@@ -86,7 +88,7 @@ export async function getMovieInsight(title, genres, overview) {
           },
           {
             role: "user",
-            content: `Title: ${title}\nGenres: ${genres}\nOverview: ${overview}`
+            content: `Title: ${title}\nGenres: ${genres}\nOverview: ${overview}\n\nWrite exactly 2-3 sentences. Do not repeat yourself.`
           }
         ]
       },
@@ -100,6 +102,9 @@ export async function getMovieInsight(title, genres, overview) {
     return data.choices[0].message.content;
   } catch (error) {
     console.error("AI insight failed:", error);
+    console.error("Status:", error.response?.status);
+    console.error("Response data:", error.response?.data);
+    console.error("API key present:", !!OPENROUTER_API_KEY);
     return null;
   }
 }
