@@ -133,3 +133,13 @@ export function formatRuntime(minutes) {
   const mins = minutes % 60;
   return `${hrs}h ${mins}m`;
 }
+
+export function toggleSetItem(set, item) {
+  const next = new Set(set);
+  if (next.has(item)) {
+    next.delete(item);
+  } else {
+    next.add(item);
+  }
+  return next;
+}

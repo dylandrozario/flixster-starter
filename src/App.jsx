@@ -5,7 +5,7 @@ import MovieList from './components/MovieList/MovieList'
 import MovieModal from './components/MovieModal/MovieModal'
 import Footer from './components/Footer/Footer'
 import Sidebar from './components/Sidebar/Sidebar'
-import { fetchNowPlaying, searchMovies, fetchMovieDetails, sortMovies } from './utils/api'
+import { fetchNowPlaying, searchMovies, fetchMovieDetails as fetchDetails, sortMovies, toggleSetItem } from './utils/api'
 import './App.css'
 
 const App = () => {
@@ -48,12 +48,11 @@ const App = () => {
     }
   };
 
-  const handleMovieClick = async (movieId) => {
-    triggerRef.current = document.activeElement;
+  const loadMovieDetails = async (movieId) => {
     setModalError(null);
 
     try {
-      const data = await fetchMovieDetails(movieId);
+      const data = await fetchDetails(movieId);
       setSelectedMovie(data);
     } catch (err) {
       setModalError(err.message);
@@ -63,6 +62,11 @@ const App = () => {
   useEffect(() => {
     loadMovies("", 1);
   }, []);
+
+  const handleMovieClick = (movieId) => {
+    triggerRef.current = document.activeElement;
+    loadMovieDetails(movieId);
+  };
 
   const handleCloseModal = () => {
     setSelectedMovie(null);
@@ -88,39 +92,15 @@ const App = () => {
   };
 
   const handleToggleHeart = (movieId) => {
-    setHearted((prev) => {
-      const next = new Set(prev);
-      if (next.has(movieId)) {
-        next.delete(movieId);
-      } else {
-        next.add(movieId);
-      }
-      return next;
-    });
+    setHearted((prev) => toggleSetItem(prev, movieId));
   };
 
   const handleToggleStar = (movieId) => {
-    setStarred((prev) => {
-      const next = new Set(prev);
-      if (next.has(movieId)) {
-        next.delete(movieId);
-      } else {
-        next.add(movieId);
-      }
-      return next;
-    });
+    setStarred((prev) => toggleSetItem(prev, movieId));
   };
 
   const handleToggleWatched = (movieId) => {
-    setWatched((prev) => {
-      const next = new Set(prev);
-      if (next.has(movieId)) {
-        next.delete(movieId);
-      } else {
-        next.add(movieId);
-      }
-      return next;
-    });
+    setWatched((prev) => toggleSetItem(prev, movieId));
   };
 
   const handleLoadMore = () => {
@@ -133,6 +113,7 @@ const App = () => {
     loadMovies(searchQuery, page);
   };
 
+
   return (
     <div className="App">
       <Header
@@ -143,20 +124,20 @@ const App = () => {
       />
       <main>
         {!isSearchMode && <Hero movies={movies} onMovieClick={handleMovieClick} />}
-        <MovieList
+      <MovieList
           movies={sortMovies(movies, sortBy)}
-          onMovieClick={handleMovieClick}
-          onLoadMore={handleLoadMore}
-          hasMore={page < totalPages}
-          isLoading={isLoading}
-          error={error}
-          onRetry={handleRetry}
-          isSearchMode={isSearchMode}
-          searchQuery={searchQuery}
-          sortBy={sortBy}
+        onMovieClick={handleMovieClick}
+        onLoadMore={handleLoadMore}
+        hasMore={page < totalPages}
+        isLoading={isLoading}
+        error={error}
+        onRetry={handleRetry}
+        isSearchMode={isSearchMode}
+        searchQuery={searchQuery}
+        sortBy={sortBy}
           onSortChange={setSortBy}
-          page={page}
-          totalPages={totalPages}
+        page={page}
+        totalPages={totalPages}
           hearted={hearted}
           starred={starred}
           watched={watched}
